@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compass — OT Cybersecurity Risk Assessment</title>
+<style>
+  :root {
+    --bg: #f5f6f4;
+    --surface: #ffffff;
+    --surface-2: #eef0ed;
+    --ink: #1c2124;
+    --ink-soft: #565f5f;
+    --ink-mute: #8a928f;
+    --border: #dcdfda;
+    --accent: #1f4b5c;
+    --accent-soft: #e4edef;
+    --critical: #b3261e; --critical-bg: #fbeceb;
+    --high: #a4650a; --high-bg: #faf0e0;
+    --medium: #2f6690; --medium-bg: #e8eef3;
+    --good: #2e6b46; --good-bg: #e8f2ea;
+    --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.5; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+  .masthead { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+  .wordmark h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin: 0; font-family: Georgia, "Times New Roman", serif; }
+  .wordmark span.tag { font-size: 13px; color: var(--ink-soft); font-family: var(--mono); display: block; margin-top: 2px; }
+
+  nav.tabs { display: flex; gap: 6px; margin-bottom: 1.75rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  nav.tabs button {
+    font-size: 13.5px; padding: 9px 16px; border: none; background: none; color: var(--ink-mute);
+    cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500;
+  }
+  nav.tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  nav.tabs button:disabled { color: #c3c8c4; cursor: not-allowed; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem 1.5rem; margin-bottom: 1.25rem; }
+  .card h2 { font-size: 16px; margin: 0 0 4px; }
+  .card .sub { font-size: 13px; color: var(--ink-mute); margin: 0 0 1.1rem; }
+
+  label.field { display: block; margin-bottom: 1rem; }
+  label.field span { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 5px; font-weight: 500; }
+  input[type=text], input[type=date] {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: var(--sans); background: var(--bg);
+  }
+  textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: var(--sans);
+    background: var(--bg); resize: vertical; min-height: 50px;
+  }
+
+  .standard-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  @media (max-width: 640px) { .standard-choice { grid-template-columns: 1fr; } }
+  .standard-card {
+    border: 1.5px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; cursor: pointer; transition: border-color .15s ease;
+  }
+  .standard-card:hover { border-color: var(--accent); }
+  .standard-card.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .standard-card h3 { font-size: 14.5px; margin: 0 0 4px; }
+  .standard-card p { font-size: 12.5px; color: var(--ink-soft); margin: 0; }
+
+  .btn {
+    font-size: 13.5px; padding: 9px 18px; border-radius: 999px; border: 1px solid var(--accent);
+    background: var(--accent); color: #fff; cursor: pointer; font-weight: 500;
+  }
+  .btn:hover { opacity: .92; }
+  .btn.secondary { background: var(--surface); color: var(--accent); }
+  .btn:disabled { background: #cfd3d0; border-color: #cfd3d0; color: #fff; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: .5rem; }
+
+  .disclaimer {
+    font-size: 12.5px; color: var(--ink-mute); background: var(--surface-2); border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1.25rem;
+  }
+
+  .progress-bar { height: 7px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-bottom: 1.5rem; position: sticky; top: 0; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width .2s ease; }
+  .progress-label { font-size: 12.5px; color: var(--ink-mute); margin: -1.1rem 0 1.5rem; text-align: right; }
+
+  .jump-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; }
+  .jump-list a {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); text-decoration: none;
+  }
+  .jump-list a:hover { background: var(--accent-soft); color: var(--accent); }
+
+  .group-header { font-size: 14.5px; font-weight: 600; margin: 1.8rem 0 .6rem; padding-top: .4rem; scroll-margin-top: 16px; }
+  .group-header .csf-tag { font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 2px 9px; border-radius: 6px; margin-left: 8px; vertical-align: middle; }
+
+  .control-row { border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem; margin-bottom: 10px; background: var(--surface); }
+  .control-row.is-na { opacity: .55; }
+  .control-id { font-family: var(--mono); font-size: 11.5px; color: var(--ink-mute); margin-bottom: 3px; }
+  .control-text { font-size: 14px; margin: 0 0 .7rem; }
+
+  .maturity-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: .6rem; }
+  .maturity-opt {
+    font-size: 12px; padding: 6px 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; color: var(--ink-soft);
+  }
+  .maturity-opt.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .na-toggle { font-size: 12px; color: var(--ink-mute); display: flex; align-items: center; gap: 5px; margin-left: auto; cursor: pointer; }
+
+  .rubric-toggle { font-size: 12.5px; color: var(--accent); cursor: pointer; text-decoration: underline; background: none; border: none; padding: 0; margin-bottom: 1rem; }
+  .rubric-box { display: none; background: var(--surface-2); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1.5rem; font-size: 12.5px; color: var(--ink-soft); }
+  .rubric-box.show { display: block; }
+  .rubric-box dt { font-weight: 600; color: var(--ink); margin-top: 6px; }
+  .rubric-box dt:first-child { margin-top: 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-mute); font-weight: 600; }
+  td.num { text-align: center; font-family: var(--mono); }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
+  .kpi .label { font-size: 12.5px; color: var(--ink-mute); margin: 0 0 6px; }
+  .kpi .value { font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .kpi .tag { font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 6px; display: inline-block; margin-top: 4px; }
+
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+  @media (max-width: 780px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-box { position: relative; height: 300px; }
+
+  .gap-strength-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 780px) { .gap-strength-grid { grid-template-columns: 1fr; } }
+  .gs-list { list-style: none; margin: 0; padding: 0; }
+  .gs-list li { font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .gs-list li:last-child { border-bottom: none; }
+  .gs-list .score { font-family: var(--mono); font-weight: 600; margin-right: 6px; }
+  .gs-list .remediation { display: block; font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+  .gs-list .attack-link { display: inline-block; font-size: 11px; color: var(--accent); text-decoration: none; margin-top: 3px; }
+  .gs-list .attack-link:hover { text-decoration: underline; }
+
+  .crit-row { display: flex; gap: 6px; align-items: center; margin-bottom: .6rem; flex-wrap: wrap; }
+  .crit-row span.crit-label { font-size: 11.5px; color: var(--ink-mute); margin-right: 4px; }
+  .crit-opt { font-size: 11.5px; padding: 4px 10px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; color: var(--ink-soft); }
+  .crit-opt.selected-low { background: var(--surface-2); border-color: var(--ink-mute); color: var(--ink-soft); }
+  .crit-opt.selected-standard { background: var(--medium-bg); border-color: var(--medium); color: var(--medium); }
+  .crit-opt.selected-high { background: var(--critical-bg); border-color: var(--critical); color: var(--critical); }
+
+  .evidence-row { margin-top: .5rem; }
+  .evidence-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .evidence-chip { position: relative; display: flex; align-items: center; gap: 6px; font-size: 11.5px; background: var(--surface-2); border-radius: 8px; padding: 5px 8px; }
+  .evidence-chip img { width: 28px; height: 28px; object-fit: cover; border-radius: 5px; }
+  .evidence-chip a { color: var(--accent); text-decoration: none; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .evidence-chip .remove-x { cursor: pointer; color: var(--ink-mute); font-weight: 700; padding: 0 2px; }
+  .attach-btn { font-size: 12px; color: var(--accent); cursor: pointer; background: none; border: 1px dashed var(--border); border-radius: 8px; padding: 5px 10px; }
+
+  .mode-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .mode-tabs button { font-size: 12.5px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-soft); cursor: pointer; }
+  .mode-tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .multi-slot { margin-bottom: .5rem; }
+  .multi-slot-list { display: flex; flex-direction: column; gap: 8px; margin-top: .6rem; }
+  .multi-slot-item { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; background: var(--surface-2); border-radius: 8px; padding: 7px 11px; }
+  .multi-slot-item .remove-x { cursor: pointer; color: var(--ink-mute); font-weight: 700; }
+
+  .heatmap-group { margin-bottom: 1rem; }
+  .heatmap-group-label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .heatmap-cells { display: flex; flex-wrap: wrap; gap: 5px; }
+  .heatmap-cell {
+    width: 44px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 700; color: #fff; cursor: default;
+  }
+  .heatmap-legend { display: flex; gap: 14px; align-items: center; font-size: 11.5px; color: var(--ink-mute); margin: .6rem 0 1rem; flex-wrap: wrap; }
+  .heatmap-legend .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+  .site-heatmap-table td, .site-heatmap-table th { text-align: center; }
+  .site-heatmap-table td.site-name, .site-heatmap-table th.site-name { text-align: left; }
+  .site-heatmap-cell { color: #fff; font-weight: 600; border-radius: 6px; }
+
+  footer.note { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 12px; color: var(--ink-mute); }
+
+  @media print {
+    nav.tabs, .btn-row, #screen-start, #screen-assessment, #screen-results, #screen-compare, .rubric-toggle { display: none !important; }
+    #screen-report { display: block !important; }
+    body { background: #fff; }
+    .card { border: none; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="wordmark">
+      <h1>Compass</h1>
+      <span class="tag">OT cybersecurity risk assessment &amp; maturity mapping</span>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button id="tab-start" class="active" onclick="showScreen('start')">Start</button>
+    <button id="tab-assessment" onclick="showScreen('assessment')" disabled>Assessment</button>
+    <button id="tab-results" onclick="showScreen('results')" disabled>Detailed Results</button>
+    <button id="tab-report" onclick="showScreen('report')" disabled>Final Report</button>
+    <button id="tab-compare" onclick="showScreen('compare')">Team, Trends &amp; Rollups</button>
+    <button id="tab-newassessment" onclick="resetAll()" style="margin-left:auto; color:var(--ink-mute);">↺ New assessment</button>
+  </nav>
+
+  <!-- START SCREEN -->
+  <div class="screen active" id="screen-start">
+    <div class="disclaimer">
+      This tool uses a representative, illustrative set of controls based on NIST SP 800-82 Rev. 3 (via tailored NIST SP 800-53 control families) and IEC 62443 (Foundational Requirements plus security program elements from 62443-2-1). It is not a complete, verbatim reproduction of either standard and should not substitute for the official standards in a certification-grade audit.
+    </div>
+
+    <div class="card">
+      <h2>Assessment details</h2>
+      <p class="sub">This information appears on your final report.</p>
+      <label class="field"><span>Organization / facility name</span><input type="text" id="inp-org" placeholder="e.g. Riverside Water Treatment Plant"></label>
+      <label class="field"><span>Assessor name</span><input type="text" id="inp-assessor" placeholder="e.g. Jane Assessor"></label>
+      <label class="field"><span>Assessment date</span><input type="date" id="inp-date"></label>
+      <label class="field"><span>Industry</span>
+        <select id="inp-industry" style="width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:8px; font-size:14px; font-family:var(--sans); background:var(--bg);">
+          <option value="general">General / Not specified</option>
+          <option value="oilgas">Oil &amp; Gas</option>
+          <option value="putilities">Power &amp; Utilities</option>
+          <option value="chemical">Chemical</option>
+          <option value="manufacturing">Manufacturing</option>
+          <option value="healthcare">Healthcare</option>
+          <option value="water">Water &amp; Wastewater</option>
+        </select>
+      </label>
+      <p class="sub" style="margin:-.5rem 0 0;">Lightly adjusts wording (e.g. "OT systems" → "pipeline SCADA") and, if you've entered figures, enables benchmark comparison on the final report.</p>
+    </div>
+
+    <div class="card">
+      <h2>Choose a standard</h2>
+      <p class="sub">You'll assess against one standard per session. Run it again later with the other standard to compare.</p>
+      <div class="standard-choice">
+        <div class="standard-card" id="choice-nist" onclick="selectStandard('nist')">
+          <h3>NIST SP 800-82 Rev. 3</h3>
+          <p>18 control families tailored for OT (Access Control, Incident Response, Configuration Management, and others), 36 representative controls total.</p>
+        </div>
+        <div class="standard-card" id="choice-iec" onclick="selectStandard('iec')">
+          <h3>IEC 62443</h3>
+          <p>7 Foundational Requirements plus 2 security-program elements from 62443-2-1, 25 representative controls total.</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-begin" onclick="beginAssessment()" disabled>Begin assessment</button>
+        <label class="btn secondary" style="cursor:pointer;">
+          Load saved assessment
+          <input type="file" accept="application/json" style="display:none;" onchange="loadAssessment(event)">
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Scoring options</h2>
+      <p class="sub">Optional — leave off if you just want a straightforward equal-weighted score.</p>
+      <label style="display:flex; align-items:center; gap:8px; font-size:13.5px; cursor:pointer;">
+        <input type="checkbox" id="inp-weighting"> Enable criticality weighting — let high-consequence controls count more toward the averages
+      </label>
+    </div>
+  </div>
+
+  <!-- ASSESSMENT SCREEN -->
+  <div class="screen" id="screen-assessment">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
+    <p class="progress-label" id="progress-label">0 of 0 controls scored</p>
+
+    <button class="rubric-toggle" onclick="toggleRubric()">What do maturity levels 1-5 mean?</button>
+    <dl class="rubric-box" id="rubric-box">
+      <dt>1 — Initial</dt><dd>Ad hoc or undocumented. Where it happens, it depends on individual effort rather than a defined process.</dd>
+      <dt>2 — Managed</dt><dd>Performed, but reactively and inconsistently. Some documentation may exist but isn't consistently applied across sites or systems.</dd>
+      <dt>3 — Defined</dt><dd>A documented, standardized process is approved and consistently applied organization-wide, with clear roles and responsibilities.</dd>
+      <dt>4 — Quantitatively Managed</dt><dd>The practice is measured. Metrics are collected and reviewed regularly against defined targets.</dd>
+      <dt>5 — Optimizing</dt><dd>Continuously improved based on measured performance, and proactively adapted as threats, technology, or the environment change.</dd>
+    </dl>
+
+    <div class="jump-list" id="jump-list"></div>
+    <div id="control-groups"></div>
+
+    <div class="btn-row">
+      <button class="btn secondary" onclick="saveAssessment()">Save assessment (.json)</button>
+      <button class="btn" onclick="showScreen('results')">View detailed results</button>
+    </div>
+  </div>
+
+  <!-- DETAILED RESULTS SCREEN -->
+  <div class="screen" id="screen-results">
+    <div class="card">
+      <h2>Detailed results — every control</h2>
+      <p class="sub">Full scoring detail behind the final report, including notes and N/A exclusions.</p>
+      <div style="overflow-x:auto;">
+        <table id="results-table">
+          <thead><tr><th>Group</th><th>ID</th><th>Control</th><th>CSF Function</th><th>Maturity</th><th>ATT&amp;CK ICS</th><th>Suggested remediation</th><th>Notes</th></tr></thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="saveAssessment()">Save assessment (.json)</button>
+      <button class="btn secondary" onclick="exportCSV()">Export as CSV</button>
+      <button class="btn" onclick="showScreen('report')">Generate final report</button>
+    </div>
+  </div>
+
+  <!-- FINAL REPORT SCREEN -->
+  <div class="screen" id="screen-report">
+    <div class="card" id="report-header-card">
+      <h2 id="report-title">Final report</h2>
+      <p class="sub" id="report-meta"></p>
+    </div>
+
+    <div class="kpi-row" id="report-kpis"></div>
+
+    <div class="chart-grid">
+      <div class="card">
+        <h2>Maturity by control group</h2>
+        <p class="sub">Native groupings from the chosen standard.</p>
+        <div class="chart-box"><canvas id="chart-groups"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Maturity mapped to NIST CSF 2.0</h2>
+        <p class="sub">Each control's group maps to one CSF function; scores are averaged per function. Dashed ring = target maturity (Level 3).</p>
+        <div class="chart-box"><canvas id="chart-csf"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Control heatmap</h2>
+      <p class="sub">Every scored control, colored by maturity. Hover a cell for detail.</p>
+      <div class="heatmap-legend">
+        <span><span class="swatch" style="background:rgb(179,38,30);"></span>1 · Initial</span>
+        <span><span class="swatch" style="background:rgb(164,101,10);"></span>3 · Defined</span>
+        <span><span class="swatch" style="background:rgb(46,107,70);"></span>5 · Optimizing</span>
+        <span><span class="swatch" style="background:#c3c8c4;"></span>N/A or unscored</span>
+      </div>
+      <div id="report-heatmap"></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="card">
+        <h2>Maturity distribution</h2>
+        <p class="sub">How many scored controls landed at each level.</p>
+        <div class="chart-box"><canvas id="chart-histogram"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Risk quadrant</h2>
+        <p class="sub" id="quadrant-sub">Maturity vs. criticality — the upper-left is your priority zone.</p>
+        <div class="chart-box"><canvas id="chart-quadrant"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>NIST CSF 2.0 function scores</h2>
+      <p class="sub" id="benchmark-status"></p>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Function</th><th>Controls mapped</th><th>Average maturity</th><th>Gap vs. target (3.0)</th><th>Industry benchmark</th><th>Vs. benchmark</th></tr></thead>
+          <tbody id="csf-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Where to focus</h2>
+      <p class="sub" style="margin-bottom:.5rem;">Lowest-scoring controls, with suggested remediation and the related MITRE ATT&amp;CK for ICS technique.</p>
+      <ul class="gs-list" id="gaps-list"></ul>
+      <p class="sub" style="margin:1.2rem 0 .5rem;">Highest-scoring controls (strengths)</p>
+      <ul class="gs-list" id="strengths-list"></ul>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn secondary" onclick="saveAssessment()">Save assessment (.json)</button>
+      <button class="btn secondary" onclick="window.print()">Print / save as PDF</button>
+      <button class="btn secondary" onclick="resetAll()">Start new assessment</button>
+    </div>
+
+    <footer class="note">
+      Maturity is self-assessed on a 1-5 scale (CMMI-style). CSF function averages reflect a group-level mapping designed for this tool; treat them as a directional view of program maturity, not an official NIST or ISA crosswalk. Controls marked N/A are excluded from all averages.
+    </footer>
+  </div>
+
+  <!-- MULTI-ASSESSMENT SCREEN -->
+  <div class="screen" id="screen-compare">
+    <div class="disclaimer">
+      Load two or more saved Compass assessment files (from the Save button on any assessment) to combine or compare them. Every mode works off the shared NIST CSF 2.0 mapping, so files from different standards, sites, or assessors can still be brought together.
+    </div>
+
+    <div class="mode-tabs">
+      <button id="mode-btn-compare" class="active" onclick="setCombineMode('compare')">Compare Two</button>
+      <button id="mode-btn-team" onclick="setCombineMode('team')">Team Average</button>
+      <button id="mode-btn-rollup" onclick="setCombineMode('rollup')">Multi-Site Rollup</button>
+      <button id="mode-btn-trend" onclick="setCombineMode('trend')">Trend Over Time</button>
+    </div>
+
+    <!-- COMPARE MODE -->
+    <div class="combine-mode" id="mode-compare">
+      <div class="chart-grid">
+        <div class="card">
+          <h2>Assessment A</h2>
+          <label class="btn secondary" style="cursor:pointer; display:inline-block;">
+            Load file
+            <input type="file" accept="application/json" style="display:none;" onchange="loadCompareFile(event,'A')">
+          </label>
+          <p class="sub" id="compare-a-meta" style="margin-top:.6rem;">Nothing loaded yet.</p>
+        </div>
+        <div class="card">
+          <h2>Assessment B</h2>
+          <label class="btn secondary" style="cursor:pointer; display:inline-block;">
+            Load file
+            <input type="file" accept="application/json" style="display:none;" onchange="loadCompareFile(event,'B')">
+          </label>
+          <p class="sub" id="compare-b-meta" style="margin-top:.6rem;">Nothing loaded yet.</p>
+        </div>
+      </div>
+
+      <div id="compare-results" style="display:none;">
+        <div class="kpi-row" id="compare-kpis"></div>
+        <div class="card">
+          <h2>NIST CSF 2.0 comparison</h2>
+          <p class="sub">Overlaid maturity by function. Dashed ring = target maturity (Level 3).</p>
+          <div class="chart-box"><canvas id="chart-compare"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Function-by-function detail</h2>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>Function</th><th>A average</th><th>B average</th><th>Delta (B − A)</th></tr></thead>
+              <tbody id="compare-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEAM MODE -->
+    <div class="combine-mode" id="mode-team" style="display:none;">
+      <div class="card">
+        <h2>Load individual assessor files</h2>
+        <p class="sub">Load 2 or more assessments of the same facility, ideally on the same standard — one file per team member.</p>
+        <label class="btn secondary" style="cursor:pointer; display:inline-block;">
+          Add assessor file
+          <input type="file" accept="application/json" style="display:none;" onchange="addTeamFile(event)">
+        </label>
+        <div class="multi-slot-list" id="team-file-list"></div>
+      </div>
+
+      <div id="team-results" style="display:none;">
+        <div class="kpi-row" id="team-kpis"></div>
+        <div class="chart-grid">
+          <div class="card">
+            <h2>Team-averaged maturity by NIST CSF 2.0</h2>
+            <div class="chart-box"><canvas id="chart-team"></canvas></div>
+          </div>
+          <div class="card">
+            <h2>Where assessors disagreed most</h2>
+            <p class="sub">Widest spread between assessor scores — worth a team discussion.</p>
+            <div style="overflow-x:auto; max-height:300px; overflow-y:auto;">
+              <table>
+                <thead><tr><th>Control</th><th>Scores</th><th>Spread</th></tr></thead>
+                <tbody id="team-disagreement-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROLLUP MODE -->
+    <div class="combine-mode" id="mode-rollup" style="display:none;">
+      <div class="card">
+        <h2>Load site assessments</h2>
+        <p class="sub">Load one file per facility/site. Sites can use different standards — the rollup happens on the shared CSF mapping.</p>
+        <label class="btn secondary" style="cursor:pointer; display:inline-block;">
+          Add site file
+          <input type="file" accept="application/json" style="display:none;" onchange="addRollupFile(event)">
+        </label>
+        <div class="multi-slot-list" id="rollup-file-list"></div>
+      </div>
+
+      <div id="rollup-results" style="display:none;">
+        <div class="kpi-row" id="rollup-kpis"></div>
+        <div class="chart-grid">
+          <div class="card">
+            <h2>Enterprise rollup — NIST CSF 2.0</h2>
+            <div class="chart-box"><canvas id="chart-rollup"></canvas></div>
+          </div>
+          <div class="card">
+            <h2>Per-site overall scores</h2>
+            <p class="sub">Standalone view — each site's own maturity, unaveraged.</p>
+            <div style="overflow-x:auto;">
+              <table>
+                <thead><tr><th>Site</th><th>Standard</th><th>Overall</th></tr></thead>
+                <tbody id="rollup-site-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Site × CSF heatmap</h2>
+          <p class="sub">Each cell is one site's average maturity for that function.</p>
+          <div class="heatmap-legend">
+            <span><span class="swatch" style="background:rgb(179,38,30);"></span>1 · Initial</span>
+            <span><span class="swatch" style="background:rgb(164,101,10);"></span>3 · Defined</span>
+            <span><span class="swatch" style="background:rgb(46,107,70);"></span>5 · Optimizing</span>
+            <span><span class="swatch" style="background:#c3c8c4;"></span>No data</span>
+          </div>
+          <div style="overflow-x:auto;"><table class="site-heatmap-table" id="rollup-heatmap-table"></table></div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="card">
+            <h2>Sites ranked by overall maturity</h2>
+            <div class="chart-box"><canvas id="chart-site-ranking"></canvas></div>
+          </div>
+          <div class="card">
+            <h2>Function spread across sites</h2>
+            <p class="sub">Range (min–max) of site averages per CSF function.</p>
+            <div class="chart-box"><canvas id="chart-function-spread"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TREND MODE -->
+    <div class="combine-mode" id="mode-trend" style="display:none;">
+      <div class="card">
+        <h2>Load assessments over time</h2>
+        <p class="sub">Load 2 or more assessments of the same facility from different dates, ideally the same standard.</p>
+        <label class="btn secondary" style="cursor:pointer; display:inline-block;">
+          Add dated assessment
+          <input type="file" accept="application/json" style="display:none;" onchange="addTrendFile(event)">
+        </label>
+        <div class="multi-slot-list" id="trend-file-list"></div>
+      </div>
+
+      <div id="trend-results" style="display:none;">
+        <div class="card">
+          <h2>Overall maturity over time</h2>
+          <div class="chart-box"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>CSF function scores by assessment date</h2>
+          <div style="overflow-x:auto;">
+            <table id="trend-table"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const CSF_ORDER = ["GOVERN","IDENTIFY","PROTECT","DETECT","RESPOND","RECOVER"];
+
+function atk(id, name) { return { id, name, url: `https://attack.mitre.org/techniques/${id}/` }; }
+
+const STANDARDS = {
+  nist: {
+    label: "NIST SP 800-82 Rev. 3",
+    groups: [
+      { id:"AC", name:"Access Control", csf:"PROTECT", controls:[
+        {id:"AC-1", text:"Access to OT systems, networks, and control room workstations is restricted based on least privilege and documented role-based permissions.", remediation:"Implement role-based access control lists on OT systems and review permissions quarterly.", attack: atk("T0859","Valid Accounts")},
+        {id:"AC-2", text:"Remote access to OT environments, including vendor remote support, requires multi-factor authentication and is logged.", remediation:"Require MFA for all remote and vendor access, and log every remote session.", attack: atk("T0822","External Remote Services")}
+      ]},
+      { id:"AT", name:"Awareness & Training", csf:"PROTECT", controls:[
+        {id:"AT-1", text:"Personnel with OT responsibilities receive role-based cybersecurity training specific to control system risks.", remediation:"Deliver OT-specific security training annually to engineers and operators, covering control-system risks.", attack: atk("T0865","Spearphishing Attachment")},
+        {id:"AT-2", text:"Operators and engineers are trained to recognize and report suspected OT security incidents.", remediation:"Run tabletop scenarios so operators practice recognizing anomalous HMI behavior and reporting it quickly.", attack: atk("T0832","Manipulation of View")}
+      ]},
+      { id:"AU", name:"Audit & Accountability", csf:"DETECT", controls:[
+        {id:"AU-1", text:"Security-relevant events on OT systems and network boundary devices are logged.", remediation:"Enable logging on OT historians, HMIs, and boundary devices, forwarding logs to a central collector.", attack: atk("T0872","Indicator Removal on Host")},
+        {id:"AU-2", text:"OT audit logs are protected from tampering and reviewed on a defined schedule.", remediation:"Protect logs with write-once storage or an isolated log server, and review on a fixed schedule.", attack: atk("T0849","Masquerading")}
+      ]},
+      { id:"CA", name:"Assessment & Authorization", csf:"GOVERN", controls:[
+        {id:"CA-1", text:"OT security controls are formally assessed and authorized before new systems go into production.", remediation:"Require a documented security assessment before any new OT system is authorized for production use.", attack: atk("T0862","Supply Chain Compromise")},
+        {id:"CA-2", text:"Ongoing authorization decisions incorporate current OT risk posture rather than a one-time approval.", remediation:"Move to continuous authorization informed by current threat intel and vulnerability status.", attack: null}
+      ]},
+      { id:"CM", name:"Configuration Management", csf:"PROTECT", controls:[
+        {id:"CM-1", text:"Baseline configurations for OT devices (PLCs, HMIs, engineering workstations) are documented and version-controlled.", remediation:"Maintain a version-controlled baseline of PLC/HMI configurations and detect drift automatically where possible.", attack: atk("T0889","Modify Program")},
+        {id:"CM-2", text:"Changes to OT configurations follow a formal change control process that includes security review.", remediation:"Require security review and testing before any configuration change reaches production OT systems.", attack: atk("T0821","Modify Controller Tasking")}
+      ]},
+      { id:"CP", name:"Contingency Planning", csf:"RECOVER", controls:[
+        {id:"CP-1", text:"A documented OT-specific contingency/disaster recovery plan exists, distinct from general IT DR planning.", remediation:"Develop an OT-specific recovery plan addressing safe shutdown/restart sequences distinct from IT DR runbooks.", attack: atk("T0826","Loss of Availability")},
+        {id:"CP-2", text:"OT recovery procedures are tested periodically, including restoring from backups.", remediation:"Test full restoration from backup at least annually, including validating PLC program restoration.", attack: atk("T0879","Damage to Property")}
+      ]},
+      { id:"IA", name:"Identification & Authentication", csf:"PROTECT", controls:[
+        {id:"IA-1", text:"Users and processes accessing OT systems are uniquely identified; shared or default credentials are eliminated.", remediation:"Eliminate shared/default accounts on OT systems and enforce unique credentials per user.", attack: atk("T0812","Default Credentials")},
+        {id:"IA-2", text:"Device-to-device authentication is enforced for critical OT communications where technically feasible.", remediation:"Deploy certificate-based or cryptographic device authentication for critical OT communications where supported.", attack: atk("T0891","Hardcoded Credentials")}
+      ]},
+      { id:"IR", name:"Incident Response", csf:"RESPOND", controls:[
+        {id:"IR-1", text:"A documented OT-specific incident response plan exists and addresses the safety implications of response actions.", remediation:"Document an OT incident response plan that explicitly addresses when to prioritize safety over investigation.", attack: atk("T0831","Manipulation of Control")},
+        {id:"IR-2", text:"OT incident response procedures are exercised through tabletop or live exercises at least annually.", remediation:"Run at least one OT-specific tabletop or live IR exercise per year, including control-system restoration.", attack: atk("T0827","Loss of Control")}
+      ]},
+      { id:"MA", name:"Maintenance", csf:"PROTECT", controls:[
+        {id:"MA-1", text:"Remote maintenance access to OT equipment is authorized, logged, and disabled when not in active use.", remediation:"Disable remote maintenance access by default and enable it only for authorized, logged sessions.", attack: atk("T0886","Remote Services")},
+        {id:"MA-2", text:"Maintenance tools and diagnostic equipment connected to OT systems are controlled and checked for malware.", remediation:"Scan maintenance laptops and diagnostic tools for malware before connecting them to OT equipment.", attack: atk("T0864","Transient Cyber Asset")}
+      ]},
+      { id:"MP", name:"Media Protection", csf:"PROTECT", controls:[
+        {id:"MP-1", text:"Removable media used with OT systems is controlled, scanned, and restricted where feasible.", remediation:"Restrict or disable USB ports on OT systems and scan approved removable media before use.", attack: atk("T0847","Replication Through Removable Media")},
+        {id:"MP-2", text:"OT data on media scheduled for disposal or reuse is sanitized appropriately.", remediation:"Establish a media sanitization procedure before disposal or reuse of any OT-connected storage.", attack: null}
+      ]},
+      { id:"PE", name:"Physical & Environmental Protection", csf:"PROTECT", controls:[
+        {id:"PE-1", text:"Physical access to control rooms, cabinets, and field equipment is restricted and monitored.", remediation:"Restrict control room and cabinet access with badge/lock controls and monitor entry logs.", attack: null},
+        {id:"PE-2", text:"Environmental controls protecting OT equipment, such as power and cooling, are monitored for anomalies.", remediation:"Monitor environmental sensors for anomalies that could indicate tampering or induce unsafe conditions.", attack: atk("T0879","Damage to Property")}
+      ]},
+      { id:"PL", name:"Planning", csf:"GOVERN", controls:[
+        {id:"PL-1", text:"A documented OT cybersecurity plan defines scope, roles, responsibilities, and security requirements.", remediation:"Document a facility-specific OT security plan covering scope, roles, and minimum security requirements.", attack: null},
+        {id:"PL-2", text:"The OT security plan is reviewed and updated on a defined cycle or after significant changes.", remediation:"Review and update the OT security plan annually or after major system changes.", attack: null}
+      ]},
+      { id:"PS", name:"Personnel Security", csf:"PROTECT", controls:[
+        {id:"PS-1", text:"Personnel with OT system access undergo appropriate screening prior to being granted access.", remediation:"Screen personnel commensurate with the risk of the OT systems they will access.", attack: atk("T0859","Valid Accounts")},
+        {id:"PS-2", text:"Access to OT systems is revoked promptly upon personnel transfer or termination.", remediation:"Integrate OT access revocation into the HR offboarding process so access is removed same-day.", attack: atk("T0859","Valid Accounts")}
+      ]},
+      { id:"RA", name:"Risk Assessment", csf:"IDENTIFY", controls:[
+        {id:"RA-1", text:"OT-specific cybersecurity risk assessments are performed periodically, accounting for safety and process impact.", remediation:"Conduct an OT-specific risk assessment at least annually, scoring findings by safety and process impact.", attack: null},
+        {id:"RA-2", text:"Identified OT vulnerabilities are tracked and prioritized based on operational risk, not just CVSS score.", remediation:"Prioritize vulnerability remediation using operational risk (reachability, safety impact), not CVSS alone.", attack: null}
+      ]},
+      { id:"SA", name:"System & Services Acquisition", csf:"GOVERN", controls:[
+        {id:"SA-1", text:"Security requirements are included in procurement specifications for new OT systems and components.", remediation:"Include cybersecurity requirements in RFPs and purchase specifications for new OT equipment.", attack: atk("T0862","Supply Chain Compromise")},
+        {id:"SA-2", text:"Vendor security practices are evaluated as part of OT system acquisition decisions.", remediation:"Evaluate vendor security practices, including patch history and disclosure track record, before selection.", attack: atk("T0862","Supply Chain Compromise")}
+      ]},
+      { id:"SC", name:"System & Communications Protection", csf:"PROTECT", controls:[
+        {id:"SC-1", text:"OT networks are segmented from IT networks via firewalls or a demilitarized zone.", remediation:"Deploy a firewall or DMZ between IT and OT networks and disable direct routing between them.", attack: atk("T0886","Remote Services")},
+        {id:"SC-2", text:"Communications between OT security zones are restricted to only necessary protocols and ports.", remediation:"Restrict inter-zone traffic to only the specific protocols and ports required for operation.", attack: atk("T0840","Network Connection Enumeration")}
+      ]},
+      { id:"SI", name:"System & Information Integrity", csf:"DETECT", controls:[
+        {id:"SI-1", text:"OT systems are monitored for indicators of malicious activity appropriate to the environment, such as allow-listing or network monitoring.", remediation:"Deploy application allow-listing or network anomaly monitoring suited to OT, where traditional AV is impractical.", attack: atk("T0851","Rootkit")},
+        {id:"SI-2", text:"A defined process exists for evaluating and applying security patches to OT systems, accounting for operational constraints.", remediation:"Establish a patch evaluation and testing process that fits within scheduled maintenance windows.", attack: atk("T0857","System Firmware")}
+      ]},
+      { id:"SR", name:"Supply Chain Risk Management", csf:"GOVERN", controls:[
+        {id:"SR-1", text:"Cybersecurity risks associated with OT hardware and software suppliers are identified and factored into vendor selection.", remediation:"Assess and document cybersecurity risk for OT hardware/software suppliers as part of vendor selection.", attack: atk("T0862","Supply Chain Compromise")},
+        {id:"SR-2", text:"Integrity of OT software and firmware updates is verified before deployment, such as through checksums or signed updates.", remediation:"Verify firmware/software update integrity via checksums or vendor-signed packages before deployment.", attack: atk("T0857","System Firmware")}
+      ]}
+    ]
+  },
+  iec: {
+    label: "IEC 62443",
+    groups: [
+      { id:"FR1", name:"FR1 — Identification & Authentication Control", csf:"PROTECT", controls:[
+        {id:"FR1-1", text:"Human users are uniquely identified and authenticated before accessing OT systems.", remediation:"Require unique login credentials for every human user of OT systems; eliminate shared logins.", attack: atk("T0859","Valid Accounts")},
+        {id:"FR1-2", text:"Software processes and devices are identified and authenticated for machine-to-machine communication where the architecture supports it.", remediation:"Enable device/process authentication for machine-to-machine OT communication where supported.", attack: atk("T0891","Hardcoded Credentials")},
+        {id:"FR1-3", text:"Default and shared accounts are eliminated or strictly controlled, with credentials managed through a formal account lifecycle process.", remediation:"Formalize an account lifecycle process covering provisioning, review, and prompt deprovisioning.", attack: atk("T0812","Default Credentials")}
+      ]},
+      { id:"FR2", name:"FR2 — Use Control", csf:"PROTECT", controls:[
+        {id:"FR2-1", text:"Authorization for OT system actions is enforced based on assigned roles and least privilege.", remediation:"Enforce least-privilege, role-based authorization for all OT system actions.", attack: atk("T0859","Valid Accounts")},
+        {id:"FR2-2", text:"Operator and engineering sessions are automatically locked or logged out after a period of inactivity.", remediation:"Enable automatic session lock/logout on operator and engineering workstations after inactivity.", attack: atk("T0823","Graphical User Interface")},
+        {id:"FR2-3", text:"Use of mobile code and portable devices within the OT environment is restricted and monitored.", remediation:"Restrict use of mobile code and portable devices in the OT environment via policy and technical controls.", attack: atk("T0864","Transient Cyber Asset")}
+      ]},
+      { id:"FR3", name:"FR3 — System Integrity", csf:"DETECT", controls:[
+        {id:"FR3-1", text:"Mechanisms are in place to detect unauthorized changes to OT control logic, configuration, or firmware.", remediation:"Deploy integrity monitoring to detect unauthorized changes to control logic, configuration, or firmware.", attack: atk("T0889","Modify Program")},
+        {id:"FR3-2", text:"Malicious code protection appropriate to OT constraints is deployed, such as application allow-listing where traditional antivirus is impractical.", remediation:"Deploy application allow-listing appropriate for OT where traditional antivirus is impractical.", attack: atk("T0851","Rootkit")},
+        {id:"FR3-3", text:"Communication integrity checks protect control traffic from undetected tampering.", remediation:"Implement communication integrity checks, such as message authentication, on critical control traffic.", attack: atk("T0855","Unauthorized Command Message")}
+      ]},
+      { id:"FR4", name:"FR4 — Data Confidentiality", csf:"PROTECT", controls:[
+        {id:"FR4-1", text:"Sensitive OT data at rest, such as recipes, setpoints, or historian data, is protected from unauthorized disclosure.", remediation:"Encrypt or access-restrict sensitive OT data at rest, such as recipes and historian data.", attack: atk("T0811","Data from Information Repositories")},
+        {id:"FR4-2", text:"Sensitive OT data in transit across network segments is protected using mechanisms appropriate to real-time constraints.", remediation:"Protect sensitive OT data in transit using mechanisms appropriate to real-time constraints.", attack: atk("T0842","Network Sniffing")},
+        {id:"FR4-3", text:"Access to sensitive OT configuration and process data is restricted to authorized roles.", remediation:"Restrict access to sensitive configuration and process data to specific authorized roles.", attack: atk("T0882","Theft of Operational Information")}
+      ]},
+      { id:"FR5", name:"FR5 — Restricted Data Flow", csf:"PROTECT", controls:[
+        {id:"FR5-1", text:"The OT network is divided into zones and conduits based on function and risk, separating IT and OT.", remediation:"Segment the OT network into zones and conduits, separating IT and OT explicitly.", attack: atk("T0886","Remote Services")},
+        {id:"FR5-2", text:"Boundary protection devices, such as firewalls, unidirectional gateways, or a DMZ, enforce traffic restrictions between zones.", remediation:"Deploy boundary protection, such as firewalls, unidirectional gateways, or a DMZ, between zones.", attack: atk("T0822","External Remote Services")},
+        {id:"FR5-3", text:"Zone and conduit definitions are documented and reviewed periodically as the architecture changes.", remediation:"Review and update zone/conduit documentation whenever the network architecture changes.", attack: atk("T0840","Network Connection Enumeration")}
+      ]},
+      { id:"FR6", name:"FR6 — Timely Response to Events", csf:"RESPOND", controls:[
+        {id:"FR6-1", text:"OT assets generate security event logs that support timely detection of anomalies.", remediation:"Ensure OT assets generate security event logs sufficient to support timely detection.", attack: atk("T0872","Indicator Removal on Host")},
+        {id:"FR6-2", text:"A defined process exists for escalating and responding to detected OT security events.", remediation:"Define and exercise an escalation process for detected OT security events.", attack: atk("T0827","Loss of Control")},
+        {id:"FR6-3", text:"Forensic data from OT security events is preserved to support post-incident investigation.", remediation:"Establish forensic data preservation procedures to support post-incident investigation.", attack: atk("T0872","Indicator Removal on Host")}
+      ]},
+      { id:"FR7", name:"FR7 — Resource Availability", csf:"RECOVER", controls:[
+        {id:"FR7-1", text:"OT network and control resources are protected against denial-of-service conditions affecting availability.", remediation:"Deploy rate limiting and network protections to guard OT resources against denial-of-service conditions.", attack: atk("T0814","Denial of Service")},
+        {id:"FR7-2", text:"Backup and restore capability exists for OT system configurations, programs, and critical data.", remediation:"Maintain and test backup/restore capability for OT configurations, programs, and critical data.", attack: atk("T0826","Loss of Availability")},
+        {id:"FR7-3", text:"Redundancy or failover exists for control functions where required by safety or availability requirements.", remediation:"Implement redundancy or failover for control functions where safety or availability requirements demand it.", attack: atk("T0879","Damage to Property")}
+      ]},
+      { id:"PGM-GOV", name:"Security Program — Governance (62443-2-1)", csf:"GOVERN", controls:[
+        {id:"PGM-1", text:"A documented OT/ICS cybersecurity management program defines policies, roles, and responsibilities.", remediation:"Document an OT/ICS cybersecurity management program with defined policies and clear ownership.", attack: null},
+        {id:"PGM-2", text:"OT cybersecurity roles and responsibilities are formally assigned and communicated across the organization.", remediation:"Formally assign and communicate OT cybersecurity roles and responsibilities across the organization.", attack: null}
+      ]},
+      { id:"PGM-RISK", name:"Security Program — Risk & Patch Management (62443-2-1)", csf:"IDENTIFY", controls:[
+        {id:"PGM-3", text:"Periodic risk assessments specific to the IACS/OT environment are conducted, considering safety and process impact.", remediation:"Perform periodic OT/IACS risk assessments that explicitly weigh safety and process consequences.", attack: null},
+        {id:"PGM-4", text:"A patch management process for OT systems accounts for testing and scheduled maintenance windows before deployment.", remediation:"Formalize a patch management process for OT systems that accounts for testing and maintenance windows.", attack: atk("T0857","System Firmware")}
+      ]}
+    ]
+  }
+};
+
+const MATURITY_LABELS = {1:"Initial", 2:"Managed", 3:"Defined", 4:"Quantitatively Managed", 5:"Optimizing"};
+const CRIT_WEIGHTS = {low: 0.5, standard: 1, high: 2};
+
+const INDUSTRIES = {
+  general: { label: "General / Not specified" },
+  oilgas: { label: "Oil & Gas" },
+  putilities: { label: "Power & Utilities" },
+  chemical: { label: "Chemical" },
+  manufacturing: { label: "Manufacturing" },
+  healthcare: { label: "Healthcare" },
+  water: { label: "Water & Wastewater" }
+};
+
+// Light, safe wording substitution — swaps a handful of generic OT nouns
+// for industry-flavored equivalents. Deliberately conservative: compound
+// adjective uses like "OT-specific" or "OT/ICS" are left alone since
+// swapping those tends to produce awkward grammar. See README.
+const INDUSTRY_TERMS = {
+  general:       { otPlural:"OT systems", otSingular:"OT system", networkPlural:"OT networks", networkSingular:"OT network", facility:"control room", facilityPlural:"control rooms", devices:"PLCs, HMIs, and engineering workstations" },
+  oilgas:        { otPlural:"pipeline SCADA and process control systems", otSingular:"pipeline SCADA or process control system", networkPlural:"pipeline SCADA networks", networkSingular:"pipeline SCADA network", facility:"control room or remote pump/compressor station", facilityPlural:"control rooms and remote pump/compressor stations", devices:"RTUs, PLCs, and SCADA HMIs" },
+  putilities:    { otPlural:"grid SCADA and substation control systems", otSingular:"grid SCADA or substation control system", networkPlural:"substation and grid control networks", networkSingular:"substation control network", facility:"control room or substation", facilityPlural:"control rooms and substations", devices:"RTUs, protective relays, and substation HMIs" },
+  chemical:      { otPlural:"DCS, BPCS, and safety instrumented systems", otSingular:"DCS or safety instrumented system", networkPlural:"process control networks", networkSingular:"process control network", facility:"control room", facilityPlural:"control rooms", devices:"DCS controllers, safety PLCs, and operator workstations" },
+  manufacturing: { otPlural:"plant floor OT and MES/SCADA systems", otSingular:"plant floor OT or MES/SCADA system", networkPlural:"plant floor OT networks", networkSingular:"plant floor OT network", facility:"control room or plant floor station", facilityPlural:"control rooms and plant floor stations", devices:"PLCs, HMIs, and MES/SCADA workstations" },
+  healthcare:    { otPlural:"building automation and connected medical device systems", otSingular:"building automation or connected medical device system", networkPlural:"building automation and biomedical device networks", networkSingular:"building automation network", facility:"facilities control room or biomedical workshop", facilityPlural:"facilities control rooms and biomedical workshops", devices:"building automation controllers, connected medical devices, and facilities workstations" },
+  water:         { otPlural:"water/wastewater SCADA systems", otSingular:"water/wastewater SCADA system", networkPlural:"water/wastewater SCADA networks", networkSingular:"water/wastewater SCADA network", facility:"control room or remote lift/pump station", facilityPlural:"control rooms and remote lift/pump stations", devices:"RTUs, PLCs, and SCADA HMIs" }
+};
+
+function industryWording(text, industryKey) {
+  const t = INDUSTRY_TERMS[industryKey] || INDUSTRY_TERMS.general;
+  const patterns = [
+    { re: "PLCs, HMIs,? (?:and )?engineering workstations", val: t.devices },
+    { re: "field equipment", val: t.devices },
+    { re: "OT equipment", val: t.devices },
+    { re: "OT assets", val: t.devices },
+    { re: "control rooms", val: t.facilityPlural },
+    { re: "control room", val: t.facility },
+    { re: "OT networks", val: t.networkPlural },
+    { re: "OT network", val: t.networkSingular },
+    { re: "OT environments", val: t.otPlural },
+    { re: "OT environment", val: t.otSingular },
+    { re: "OT systems", val: t.otPlural },
+    { re: "OT system\\b", val: t.otSingular }
+  ];
+  // Single pass over the ORIGINAL text only — avoids re-matching inside
+  // text that was just substituted in (which can itself contain phrases
+  // like "control room" for some industries).
+  const combined = new RegExp(patterns.map(p => `(${p.re})`).join("|"), "gi");
+  return text.replace(combined, (match, ...groups) => {
+    const groupValues = groups.slice(0, patterns.length);
+    const idx = groupValues.findIndex(g => g !== undefined);
+    return idx !== -1 ? patterns[idx].val : match;
+  });
+}
+
+// User-provided benchmarks, by industry, per NIST CSF 2.0 function.
+// Left null until you enter figures you've translated from published
+// sources (SANS, Fortinet, sector-specific reports, or your own firm's
+// historical assessments). See README for guidance and caveats.
+const INDUSTRY_BENCHMARKS = {
+  general:       { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null },
+  oilgas:        { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null },
+  putilities:    { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null },
+  chemical:      { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null },
+  manufacturing: { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null },
+  healthcare:    { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null },
+  water:         { GOVERN:null, IDENTIFY:null, PROTECT:null, DETECT:null, RESPOND:null, RECOVER:null }
+};
+
+function maturityColor(score) {
+  if (score === null || score === undefined) return "#c3c8c4";
+  const clamped = Math.max(1, Math.min(5, score));
+  const t = (clamped - 1) / 4;
+  const stops = [ [179,38,30], [164,101,10], [46,107,70] ];
+  let c0, c1, localT;
+  if (t <= 0.5) { c0 = stops[0]; c1 = stops[1]; localT = t / 0.5; }
+  else { c0 = stops[1]; c1 = stops[2]; localT = (t - 0.5) / 0.5; }
+  const r = Math.round(c0[0] + (c1[0]-c0[0]) * localT);
+  const g = Math.round(c0[1] + (c1[1]-c0[1]) * localT);
+  const b = Math.round(c0[2] + (c1[2]-c0[2]) * localT);
+  return `rgb(${r},${g},${b})`;
+}
+
+let state = {
+  standardKey: null,
+  org: "", assessor: "", date: "",
+  industry: "general",
+  useWeighting: false,
+  answers: {} // controlId -> {maturity: 1-5|null, na:boolean, notes:string, criticality:'low'|'standard'|'high', evidence:[{name,type,dataUrl}]}
+};
+let pendingStandardChoice = null;
+
+function selectStandard(key) {
+  pendingStandardChoice = key;
+  document.getElementById("choice-nist").classList.toggle("selected", key === "nist");
+  document.getElementById("choice-iec").classList.toggle("selected", key === "iec");
+  document.getElementById("btn-begin").disabled = false;
+}
+
+function beginAssessment() {
+  state.standardKey = pendingStandardChoice;
+  state.org = document.getElementById("inp-org").value;
+  state.assessor = document.getElementById("inp-assessor").value;
+  state.date = document.getElementById("inp-date").value;
+  state.industry = document.getElementById("inp-industry").value;
+  state.useWeighting = document.getElementById("inp-weighting").checked;
+  state.answers = {};
+  allControls().forEach(c => { state.answers[c.id] = {maturity: null, na: false, notes: "", criticality: "standard", evidence: []}; });
+
+  document.getElementById("tab-assessment").disabled = false;
+  document.getElementById("tab-results").disabled = false;
+  document.getElementById("tab-report").disabled = false;
+  renderAssessment();
+  showScreen("assessment");
+}
+
+function allControls(forState) {
+  const s = forState || state;
+  const std = STANDARDS[s.standardKey || pendingStandardChoice];
+  const out = [];
+  std.groups.forEach(g => g.controls.forEach(c => out.push({...c, groupId: g.id, groupName: g.name, csf: g.csf})));
+  return out;
+}
+
+function toggleRubric() {
+  document.getElementById("rubric-box").classList.toggle("show");
+}
+
+function renderAssessment() {
+  const std = STANDARDS[state.standardKey];
+  const jumpList = document.getElementById("jump-list");
+  const container = document.getElementById("control-groups");
+  jumpList.innerHTML = "";
+  container.innerHTML = "";
+
+  std.groups.forEach(group => {
+    jumpList.innerHTML += `<a href="#group-${group.id}">${group.name}</a>`;
+
+    let html = `<div class="group-header" id="group-${group.id}">${group.name} <span class="csf-tag">${group.csf}</span></div>`;
+    group.controls.forEach(control => {
+      const a = state.answers[control.id];
+      const critRow = state.useWeighting ? `
+        <div class="crit-row">
+          <span class="crit-label">Criticality:</span>
+          ${["low","standard","high"].map(lvl => `<button type="button" class="crit-opt ${a.criticality===lvl?'selected-'+lvl:''}" onclick="setCriticality('${control.id}','${lvl}')">${lvl.charAt(0).toUpperCase()+lvl.slice(1)}</button>`).join("")}
+        </div>` : "";
+      const evidenceChips = (a.evidence||[]).map((ev, idx) => {
+        const isImg = ev.type && ev.type.startsWith("image/");
+        const thumb = isImg ? `<img src="${ev.dataUrl}" alt="">` : `📎`;
+        return `<span class="evidence-chip">${thumb}<a href="${ev.dataUrl}" target="_blank" rel="noopener">${ev.name}</a><span class="remove-x" onclick="removeEvidence('${control.id}',${idx})">×</span></span>`;
+      }).join("");
+      html += `<div class="control-row ${a.na ? 'is-na' : ''}" id="row-${control.id}">
+        <div class="control-id">${control.id}</div>
+        <p class="control-text">${industryWording(control.text, state.industry)}</p>
+        <div class="maturity-row">
+          ${[1,2,3,4,5].map(lvl => `<button type="button" class="maturity-opt ${a.maturity===lvl?'selected':''}" onclick="setMaturity('${control.id}',${lvl})">${lvl} · ${MATURITY_LABELS[lvl]}</button>`).join("")}
+          <label class="na-toggle"><input type="checkbox" ${a.na?'checked':''} onchange="toggleNA('${control.id}', this.checked)"> N/A</label>
+        </div>
+        ${critRow}
+        <textarea placeholder="Notes (optional)" oninput="setNotes('${control.id}', this.value)">${a.notes}</textarea>
+        <div class="evidence-row">
+          <label class="attach-btn" style="cursor:pointer;">
+            + Attach evidence (photo, PDF, doc)
+            <input type="file" multiple accept="image/*,.pdf,.doc,.docx" style="display:none;" onchange="addEvidence('${control.id}', this.files)">
+          </label>
+          <div class="evidence-chips">${evidenceChips}</div>
+        </div>
+      </div>`;
+    });
+    container.innerHTML += html;
+  });
+
+  updateProgress();
+}
+
+function setCriticality(id, lvl) {
+  state.answers[id].criticality = lvl;
+  renderAssessment();
+}
+
+function addEvidence(id, fileList) {
+  const files = Array.from(fileList);
+  let remaining = files.length;
+  if (!remaining) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.answers[id].evidence.push({name: file.name, type: file.type, dataUrl: e.target.result});
+      remaining -= 1;
+      if (remaining === 0) renderAssessment();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeEvidence(id, idx) {
+  state.answers[id].evidence.splice(idx, 1);
+  renderAssessment();
+}
+
+function setMaturity(id, lvl) {
+  state.answers[id].maturity = lvl;
+  state.answers[id].na = false;
+  renderAssessment();
+}
+function toggleNA(id, checked) {
+  state.answers[id].na = checked;
+  if (checked) state.answers[id].maturity = null;
+  renderAssessment();
+}
+function setNotes(id, val) {
+  state.answers[id].notes = val;
+}
+
+function updateProgress() {
+  const all = allControls();
+  const scored = all.filter(c => state.answers[c.id].maturity !== null || state.answers[c.id].na);
+  const pct = all.length ? Math.round((scored.length / all.length) * 100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-label").textContent = `${scored.length} of ${all.length} controls addressed`;
+}
+
+function computeScores(forState) {
+  const s = forState || state;
+  const all = allControls(s);
+  const scoredControls = all.filter(c => !s.answers[c.id].na && s.answers[c.id].maturity !== null);
+  const weightOf = c => (s.useWeighting && s.answers[c.id].criticality) ? (CRIT_WEIGHTS[s.answers[c.id].criticality] || 1) : 1;
+
+  const groupTotals = {};
+  scoredControls.forEach(c => {
+    const w = weightOf(c);
+    groupTotals[c.groupId] = groupTotals[c.groupId] || {sum:0, weight:0, name:c.groupName};
+    groupTotals[c.groupId].sum += s.answers[c.id].maturity * w;
+    groupTotals[c.groupId].weight += w;
+  });
+  const groupAverages = Object.entries(groupTotals).map(([id, v]) => ({id, name:v.name, avg: v.sum/v.weight}));
+
+  const csfTotals = {};
+  CSF_ORDER.forEach(f => csfTotals[f] = {sum:0, weight:0, count:0});
+  scoredControls.forEach(c => {
+    const w = weightOf(c);
+    csfTotals[c.csf].sum += s.answers[c.id].maturity * w;
+    csfTotals[c.csf].weight += w;
+    csfTotals[c.csf].count += 1;
+  });
+  const csfAverages = CSF_ORDER.map(f => ({
+    func: f,
+    count: csfTotals[f].count,
+    avg: csfTotals[f].weight ? csfTotals[f].sum / csfTotals[f].weight : null
+  }));
+
+  let overall = null;
+  if (scoredControls.length) {
+    const totalWeight = scoredControls.reduce((sum,c) => sum + weightOf(c), 0);
+    const totalScore = scoredControls.reduce((sum,c) => sum + s.answers[c.id].maturity * weightOf(c), 0);
+    overall = totalScore / totalWeight;
+  }
+
+  return { groupAverages, csfAverages, overall, scoredCount: scoredControls.length, totalCount: all.length };
+}
+
+function maturityBand(avg) {
+  if (avg === null) return {label:"Not scored", tag:"medium"};
+  if (avg < 2) return {label:"Ad hoc", tag:"critical"};
+  if (avg < 3) return {label:"Developing", tag:"high"};
+  if (avg < 4) return {label:"Defined", tag:"medium"};
+  return {label:"Managed / Optimizing", tag:"good"};
+}
+
+function renderResults() {
+  const all = allControls();
+  const body = document.getElementById("results-body");
+  body.innerHTML = all.map(c => {
+    const a = state.answers[c.id];
+    const maturityText = a.na ? "N/A" : (a.maturity ? `${a.maturity} · ${MATURITY_LABELS[a.maturity]}` : "—");
+    const attackText = c.attack ? `<a href="${c.attack.url}" target="_blank" rel="noopener">${c.attack.id} ${c.attack.name} ↗</a>` : "—";
+    return `<tr>
+      <td>${c.groupName}</td>
+      <td style="font-family:var(--mono);">${c.id}</td>
+      <td>${industryWording(c.text, state.industry)}</td>
+      <td>${c.csf}</td>
+      <td class="num">${maturityText}</td>
+      <td>${attackText}</td>
+      <td>${c.remediation || "—"}</td>
+      <td>${a.notes ? a.notes.replace(/</g,"&lt;") : ""}</td>
+    </tr>`;
+  }).join("");
+}
+
+let chartGroups, chartCSF, chartHistogram, chartQuadrant;
+function renderReport() {
+  const scores = computeScores();
+  const std = STANDARDS[state.standardKey];
+
+  document.getElementById("report-title").textContent = `${state.org || "(unnamed organization)"} — OT Cybersecurity Risk Assessment`;
+  document.getElementById("report-meta").textContent = `${std.label} · Assessed by ${state.assessor || "(unspecified)"} on ${state.date || "(no date)"}`;
+
+  const band = maturityBand(scores.overall);
+  document.getElementById("report-kpis").innerHTML = `
+    <div class="kpi">
+      <p class="label">Overall maturity</p>
+      <p class="value">${scores.overall !== null ? scores.overall.toFixed(1) : "—"}</p>
+      <span class="tag" style="background:var(--${band.tag}-bg); color:var(--${band.tag});">${band.label}</span>
+    </div>
+    <div class="kpi"><p class="label">Controls scored</p><p class="value">${scores.scoredCount} / ${scores.totalCount}</p></div>
+    <div class="kpi"><p class="label">CSF functions represented</p><p class="value">${scores.csfAverages.filter(f=>f.count>0).length} / 6</p></div>
+  `;
+
+  // Groups radar
+  if (chartGroups) chartGroups.destroy();
+  chartGroups = new Chart(document.getElementById("chart-groups"), {
+    type: "radar",
+    data: {
+      labels: scores.groupAverages.map(g => g.id),
+      datasets: [{
+        label: "Maturity",
+        data: scores.groupAverages.map(g => g.avg),
+        backgroundColor: "rgba(31,75,92,0.15)",
+        borderColor: "#1f4b5c",
+        pointBackgroundColor: "#1f4b5c"
+      }]
+    },
+    options: { scales: { r: { min:0, max:5, ticks:{stepSize:1} } }, plugins:{legend:{display:false}} }
+  });
+
+  // CSF radar with target ring, plus industry benchmark if entered
+  const benchmarks = INDUSTRY_BENCHMARKS[state.industry] || {};
+  const hasBenchmark = CSF_ORDER.some(f => benchmarks[f] !== null && benchmarks[f] !== undefined);
+
+  const csfDatasets = [
+    {
+      label: "Current maturity",
+      data: scores.csfAverages.map(f => f.avg),
+      backgroundColor: "rgba(31,75,92,0.15)",
+      borderColor: "#1f4b5c",
+      pointBackgroundColor: "#1f4b5c"
+    },
+    {
+      label: "Target (Level 3)",
+      data: CSF_ORDER.map(() => 3),
+      borderColor: "#a4650a",
+      borderDash: [4,4],
+      pointRadius: 0,
+      fill: false
+    }
+  ];
+  if (hasBenchmark) {
+    csfDatasets.push({
+      label: `${INDUSTRIES[state.industry].label} benchmark`,
+      data: CSF_ORDER.map(f => benchmarks[f]),
+      borderColor: "#6b4fa0",
+      backgroundColor: "rgba(107,79,160,0.1)",
+      borderDash: [2,2],
+      pointBackgroundColor: "#6b4fa0"
+    });
+  }
+
+  if (chartCSF) chartCSF.destroy();
+  chartCSF = new Chart(document.getElementById("chart-csf"), {
+    type: "radar",
+    data: { labels: CSF_ORDER, datasets: csfDatasets },
+    options: { scales: { r: { min:0, max:5, ticks:{stepSize:1} } }, plugins:{legend:{position:"bottom"}} }
+  });
+
+  document.getElementById("benchmark-status").textContent = hasBenchmark
+    ? `Showing your entered ${INDUSTRIES[state.industry].label} benchmark figures.`
+    : `No benchmark entered yet for ${INDUSTRIES[state.industry].label}. Add figures to INDUSTRY_BENCHMARKS in index.html to enable this comparison — see README.`;
+
+  // Control heatmap, grouped
+  const std2 = STANDARDS[state.standardKey];
+  document.getElementById("report-heatmap").innerHTML = std2.groups.map(group => {
+    const cells = group.controls.map(control => {
+      const a = state.answers[control.id];
+      const val = a.na ? null : a.maturity;
+      const label = a.na ? "N/A" : (val !== null ? val : "—");
+      const title = `${control.id}: ${industryWording(control.text, state.industry)} — ${a.na ? "N/A" : (val !== null ? MATURITY_LABELS[val] : "not scored")}`;
+      return `<div class="heatmap-cell" style="background:${maturityColor(val)};" title="${title.replace(/"/g,'&quot;')}">${control.id}<br>${label}</div>`;
+    }).join("");
+    return `<div class="heatmap-group">
+      <div class="heatmap-group-label">${group.name}</div>
+      <div class="heatmap-cells">${cells}</div>
+    </div>`;
+  }).join("");
+
+  // Maturity distribution histogram
+  const allForHist = allControls().filter(c => !state.answers[c.id].na && state.answers[c.id].maturity !== null);
+  const histCounts = [1,2,3,4,5].map(lvl => allForHist.filter(c => state.answers[c.id].maturity === lvl).length);
+  if (chartHistogram) chartHistogram.destroy();
+  chartHistogram = new Chart(document.getElementById("chart-histogram"), {
+    type: "bar",
+    data: {
+      labels: [1,2,3,4,5].map(l => `${l} · ${MATURITY_LABELS[l]}`),
+      datasets: [{ label: "Controls", data: histCounts, backgroundColor: [1,2,3,4,5].map(l => maturityColor(l)) }]
+    },
+    options: { scales: { y: { beginAtZero:true, ticks:{stepSize:1} } }, plugins:{legend:{display:false}} }
+  });
+
+  // Risk quadrant (maturity vs criticality) — only meaningful if weighting is on
+  const quadrantSub = document.getElementById("quadrant-sub");
+  if (chartQuadrant) chartQuadrant.destroy();
+  if (state.useWeighting) {
+    quadrantSub.textContent = "Maturity vs. criticality — the upper-left is your priority zone.";
+    const critValue = {low:1, standard:2, high:3};
+    const points = allForHist.map(c => ({
+      x: state.answers[c.id].maturity,
+      y: critValue[state.answers[c.id].criticality || "standard"],
+      label: `${c.id}: ${c.text}`
+    }));
+    chartQuadrant = new Chart(document.getElementById("chart-quadrant"), {
+      type: "scatter",
+      data: { datasets: [{ label: "Controls", data: points, backgroundColor: "#1f4b5c" }] },
+      options: {
+        scales: {
+          x: { min:0.5, max:5.5, title:{display:true, text:"Maturity"}, ticks:{stepSize:1} },
+          y: { min:0.5, max:3.5, title:{display:true, text:"Criticality"}, ticks:{stepSize:1, callback:v => ({1:"Low",2:"Standard",3:"High"}[v] || "")} }
+        },
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ctx.raw.label } } }
+      }
+    });
+  } else {
+    quadrantSub.textContent = "Enable criticality weighting on the Start screen to populate this chart.";
+  }
+
+  document.getElementById("csf-table-body").innerHTML = scores.csfAverages.map(f => {
+    const gap = f.avg !== null ? (3 - f.avg).toFixed(1) : "—";
+    const bm = benchmarks[f.func];
+    const bmText = (bm !== null && bm !== undefined) ? bm.toFixed(1) : "—";
+    const vsBm = (bm !== null && bm !== undefined && f.avg !== null) ? (f.avg - bm).toFixed(1) : "—";
+    return `<tr>
+      <td>${f.func}</td>
+      <td class="num">${f.count}</td>
+      <td class="num">${f.avg !== null ? f.avg.toFixed(1) : "—"}</td>
+      <td class="num">${gap}</td>
+      <td class="num">${bmText}</td>
+      <td class="num">${vsBm}</td>
+    </tr>`;
+  }).join("");
+
+  const all = allControls().filter(c => !state.answers[c.id].na && state.answers[c.id].maturity !== null);
+  const sorted = [...all].sort((a,b) => state.answers[a.id].maturity - state.answers[b.id].maturity);
+  const gaps = sorted.slice(0, 5);
+  const strengths = sorted.slice(-3).reverse();
+
+  document.getElementById("gaps-list").innerHTML = gaps.length
+    ? gaps.map(c => {
+        const attackLine = c.attack
+          ? `<a class="attack-link" href="${c.attack.url}" target="_blank" rel="noopener">Related: ${c.attack.id} ${c.attack.name} (MITRE ATT&amp;CK for ICS) ↗</a>`
+          : "";
+        return `<li><span class="score">${state.answers[c.id].maturity}</span>${c.id} — ${industryWording(c.text, state.industry)}
+          ${c.remediation ? `<span class="remediation">Suggested: ${c.remediation}</span>` : ""}
+          ${attackLine}
+        </li>`;
+      }).join("")
+    : "<li>Not enough scored controls yet.</li>";
+  document.getElementById("strengths-list").innerHTML = strengths.length
+    ? strengths.map(c => `<li><span class="score">${state.answers[c.id].maturity}</span>${c.id} — ${industryWording(c.text, state.industry)}</li>`).join("")
+    : "<li>Not enough scored controls yet.</li>";
+}
+
+function showScreen(name) {
+  ["start","assessment","results","report","compare"].forEach(s => {
+    document.getElementById("screen-"+s).classList.toggle("active", s===name);
+    document.getElementById("tab-"+s).classList.toggle("active", s===name);
+  });
+  if (name === "results") renderResults();
+  if (name === "report") renderReport();
+  if (name === "compare") renderCompare();
+  window.scrollTo(0,0);
+}
+
+function saveAssessment() {
+  const payload = JSON.stringify(state, null, 2);
+  const blob = new Blob([payload], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const orgSlug = (state.org || "assessment").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  a.href = url;
+  a.download = `${orgSlug}-ot-risk-assessment.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(val) {
+  const s = (val === null || val === undefined) ? "" : String(val);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportCSV() {
+  const all = allControls();
+  const header = ["Group","ID","Control","CSF Function","Maturity","Criticality","ATT&CK ICS","Suggested Remediation","Notes"];
+  const rows = all.map(c => {
+    const a = state.answers[c.id];
+    const maturityText = a.na ? "N/A" : (a.maturity ? `${a.maturity} - ${MATURITY_LABELS[a.maturity]}` : "");
+    const attackText = c.attack ? `${c.attack.id} ${c.attack.name} (${c.attack.url})` : "";
+    return [
+      c.groupName,
+      c.id,
+      industryWording(c.text, state.industry),
+      c.csf,
+      maturityText,
+      state.useWeighting ? (a.criticality || "standard") : "",
+      attackText,
+      c.remediation || "",
+      a.notes || ""
+    ].map(csvEscape).join(",");
+  });
+  const csv = [header.map(csvEscape).join(","), ...rows].join("\r\n");
+  const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const orgSlug = (state.org || "assessment").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  a.href = url;
+  a.download = `${orgSlug}-ot-risk-assessment.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadAssessment(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      state = loaded;
+      state.industry = state.industry || "general";
+      state.useWeighting = !!state.useWeighting;
+      Object.values(state.answers || {}).forEach(a => {
+        if (a.criticality === undefined) a.criticality = "standard";
+        if (a.evidence === undefined) a.evidence = [];
+      });
+      document.getElementById("inp-org").value = state.org || "";
+      document.getElementById("inp-assessor").value = state.assessor || "";
+      document.getElementById("inp-date").value = state.date || "";
+      document.getElementById("inp-industry").value = state.industry;
+      document.getElementById("inp-weighting").checked = state.useWeighting;
+      pendingStandardChoice = state.standardKey;
+      document.getElementById("tab-assessment").disabled = false;
+      document.getElementById("tab-results").disabled = false;
+      document.getElementById("tab-report").disabled = false;
+      renderAssessment();
+      showScreen("assessment");
+    } catch (err) {
+      alert("Couldn't read that file — is it a Compass assessment .json?");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll() {
+  if (!confirm("Start a new assessment? Unsaved changes will be lost.")) return;
+  state = { standardKey: null, org:"", assessor:"", date:"", industry:"general", useWeighting:false, answers:{} };
+  pendingStandardChoice = null;
+  document.getElementById("inp-org").value = "";
+  document.getElementById("inp-assessor").value = "";
+  document.getElementById("inp-date").value = "";
+  document.getElementById("inp-industry").value = "general";
+  document.getElementById("inp-weighting").checked = false;
+  document.getElementById("choice-nist").classList.remove("selected");
+  document.getElementById("choice-iec").classList.remove("selected");
+  document.getElementById("btn-begin").disabled = true;
+  document.getElementById("tab-assessment").disabled = true;
+  document.getElementById("tab-results").disabled = true;
+  document.getElementById("tab-report").disabled = true;
+  showScreen("start");
+}
+
+let compareData = { A: null, B: null };
+let chartCompare;
+
+function loadCompareFile(event, slot) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      if (!loaded.standardKey || !STANDARDS[loaded.standardKey]) {
+        alert("That file doesn't look like a Compass assessment.");
+        return;
+      }
+      compareData[slot] = loaded;
+      const metaEl = document.getElementById(`compare-${slot.toLowerCase()}-meta`);
+      metaEl.textContent = `${loaded.org || "(unnamed)"} — ${STANDARDS[loaded.standardKey].label} — assessed ${loaded.date || "(no date)"}`;
+      renderCompare();
+    } catch (err) {
+      alert("Couldn't read that file — is it a Compass assessment .json?");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function renderCompare() {
+  const resultsBox = document.getElementById("compare-results");
+  if (!compareData.A || !compareData.B) {
+    resultsBox.style.display = "none";
+    return;
+  }
+  resultsBox.style.display = "block";
+
+  const scoresA = computeScores(compareData.A);
+  const scoresB = computeScores(compareData.B);
+
+  const bandA = maturityBand(scoresA.overall);
+  const bandB = maturityBand(scoresB.overall);
+
+  document.getElementById("compare-kpis").innerHTML = `
+    <div class="kpi">
+      <p class="label">${compareData.A.org || "Assessment A"} overall</p>
+      <p class="value">${scoresA.overall !== null ? scoresA.overall.toFixed(1) : "—"}</p>
+      <span class="tag" style="background:var(--${bandA.tag}-bg); color:var(--${bandA.tag});">${bandA.label}</span>
+    </div>
+    <div class="kpi">
+      <p class="label">${compareData.B.org || "Assessment B"} overall</p>
+      <p class="value">${scoresB.overall !== null ? scoresB.overall.toFixed(1) : "—"}</p>
+      <span class="tag" style="background:var(--${bandB.tag}-bg); color:var(--${bandB.tag});">${bandB.label}</span>
+    </div>
+    <div class="kpi">
+      <p class="label">Overall delta (B − A)</p>
+      <p class="value">${(scoresA.overall !== null && scoresB.overall !== null) ? (scoresB.overall - scoresA.overall).toFixed(1) : "—"}</p>
+    </div>
+  `;
+
+  if (chartCompare) chartCompare.destroy();
+  chartCompare = new Chart(document.getElementById("chart-compare"), {
+    type: "radar",
+    data: {
+      labels: CSF_ORDER,
+      datasets: [
+        {
+          label: compareData.A.org || "Assessment A",
+          data: scoresA.csfAverages.map(f => f.avg),
+          backgroundColor: "rgba(31,75,92,0.15)",
+          borderColor: "#1f4b5c",
+          pointBackgroundColor: "#1f4b5c"
+        },
+        {
+          label: compareData.B.org || "Assessment B",
+          data: scoresB.csfAverages.map(f => f.avg),
+          backgroundColor: "rgba(164,101,10,0.15)",
+          borderColor: "#a4650a",
+          pointBackgroundColor: "#a4650a"
+        },
+        {
+          label: "Target (Level 3)",
+          data: CSF_ORDER.map(() => 3),
+          borderColor: "#8a928f",
+          borderDash: [4,4],
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: { scales: { r: { min:0, max:5, ticks:{stepSize:1} } }, plugins:{legend:{position:"bottom"}} }
+  });
+
+  document.getElementById("compare-table-body").innerHTML = CSF_ORDER.map((f, i) => {
+    const a = scoresA.csfAverages[i].avg;
+    const b = scoresB.csfAverages[i].avg;
+    const delta = (a !== null && b !== null) ? (b - a).toFixed(1) : "—";
+    return `<tr>
+      <td>${f}</td>
+      <td class="num">${a !== null ? a.toFixed(1) : "—"}</td>
+      <td class="num">${b !== null ? b.toFixed(1) : "—"}</td>
+      <td class="num">${delta}</td>
+    </tr>`;
+  }).join("");
+}
+
+function setCombineMode(mode) {
+  ["compare","team","rollup","trend"].forEach(m => {
+    document.getElementById("mode-"+m).style.display = (m===mode) ? "block" : "none";
+    document.getElementById("mode-btn-"+m).classList.toggle("active", m===mode);
+  });
+}
+
+/* ---------- TEAM AVERAGE ---------- */
+let teamFiles = [];
+
+function addTeamFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      if (!loaded.standardKey || !STANDARDS[loaded.standardKey]) { alert("That doesn't look like a Compass assessment file."); return; }
+      if (teamFiles.length && loaded.standardKey !== teamFiles[0].standardKey) {
+        alert("This file uses a different standard than the assessments already loaded. Team Average needs everyone on the same standard.");
+        return;
+      }
+      teamFiles.push(loaded);
+      renderTeamFileList();
+      renderTeam();
+    } catch (err) { alert("Couldn't read that file."); }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+function removeTeamFile(idx) { teamFiles.splice(idx,1); renderTeamFileList(); renderTeam(); }
+
+function renderTeamFileList() {
+  document.getElementById("team-file-list").innerHTML = teamFiles.map((f,i) =>
+    `<div class="multi-slot-item"><span>${f.assessor || "(unnamed assessor)"} — ${f.org || ""}</span><span class="remove-x" onclick="removeTeamFile(${i})">×</span></div>`
+  ).join("");
+}
+
+let chartTeam;
+function renderTeam() {
+  const box = document.getElementById("team-results");
+  if (teamFiles.length < 2) { box.style.display = "none"; return; }
+  box.style.display = "block";
+
+  const stdKey = teamFiles[0].standardKey;
+  const all = allControls({standardKey: stdKey});
+  const virtual = { standardKey: stdKey, useWeighting: false, answers: {} };
+  const disagreements = [];
+
+  all.forEach(c => {
+    const scoresForControl = teamFiles
+      .map(f => f.answers[c.id])
+      .filter(a => a && !a.na && a.maturity !== null)
+      .map(a => a.maturity);
+    if (scoresForControl.length) {
+      const avg = scoresForControl.reduce((s,v) => s+v, 0) / scoresForControl.length;
+      virtual.answers[c.id] = { maturity: avg, na: false };
+      const spread = Math.max(...scoresForControl) - Math.min(...scoresForControl);
+      disagreements.push({ id: c.id, text: c.text, scores: scoresForControl, spread });
+    } else {
+      virtual.answers[c.id] = { maturity: null, na: true };
+    }
+  });
+
+  const scores = computeScores(virtual);
+  const band = maturityBand(scores.overall);
+  document.getElementById("team-kpis").innerHTML = `
+    <div class="kpi"><p class="label">Team-averaged overall</p><p class="value">${scores.overall !== null ? scores.overall.toFixed(1) : "—"}</p><span class="tag" style="background:var(--${band.tag}-bg); color:var(--${band.tag});">${band.label}</span></div>
+    <div class="kpi"><p class="label">Assessors combined</p><p class="value">${teamFiles.length}</p></div>
+    <div class="kpi"><p class="label">Controls with disagreement</p><p class="value">${disagreements.filter(d=>d.spread>0).length}</p></div>
+  `;
+
+  if (chartTeam) chartTeam.destroy();
+  chartTeam = new Chart(document.getElementById("chart-team"), {
+    type: "radar",
+    data: { labels: CSF_ORDER, datasets: [
+      { label:"Team average", data: scores.csfAverages.map(f=>f.avg), backgroundColor:"rgba(31,75,92,0.15)", borderColor:"#1f4b5c", pointBackgroundColor:"#1f4b5c" },
+      { label:"Target (Level 3)", data: CSF_ORDER.map(()=>3), borderColor:"#8a928f", borderDash:[4,4], pointRadius:0, fill:false }
+    ]},
+    options: { scales:{ r:{min:0,max:5,ticks:{stepSize:1}} }, plugins:{legend:{position:"bottom"}} }
+  });
+
+  const topDisagreements = [...disagreements].sort((a,b) => b.spread - a.spread).slice(0,8);
+  document.getElementById("team-disagreement-body").innerHTML = topDisagreements.length
+    ? topDisagreements.map(d => `<tr><td>${d.id} — ${d.text}</td><td>${d.scores.join(", ")}</td><td class="num">${d.spread}</td></tr>`).join("")
+    : `<tr><td colspan="3">No overlapping scores yet.</td></tr>`;
+}
+
+/* ---------- MULTI-SITE ROLLUP ---------- */
+let rollupFiles = [];
+
+function addRollupFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      if (!loaded.standardKey || !STANDARDS[loaded.standardKey]) { alert("That doesn't look like a Compass assessment file."); return; }
+      rollupFiles.push(loaded);
+      renderRollupFileList();
+      renderRollup();
+    } catch (err) { alert("Couldn't read that file."); }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+function removeRollupFile(idx) { rollupFiles.splice(idx,1); renderRollupFileList(); renderRollup(); }
+
+function renderRollupFileList() {
+  document.getElementById("rollup-file-list").innerHTML = rollupFiles.map((f,i) =>
+    `<div class="multi-slot-item"><span>${f.org || "(unnamed site)"} — ${STANDARDS[f.standardKey].label}</span><span class="remove-x" onclick="removeRollupFile(${i})">×</span></div>`
+  ).join("");
+}
+
+let chartRollup, chartSiteRanking, chartFunctionSpread;
+function renderRollup() {
+  const box = document.getElementById("rollup-results");
+  if (rollupFiles.length < 2) { box.style.display = "none"; return; }
+  box.style.display = "block";
+
+  const siteScores = rollupFiles.map(f => ({ file:f, scores: computeScores(f) }));
+
+  const rollupCSF = CSF_ORDER.map((func, i) => {
+    const vals = siteScores.map(s => s.scores.csfAverages[i].avg).filter(v => v !== null);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  });
+  const overallVals = siteScores.map(s => s.scores.overall).filter(v => v !== null);
+  const rollupOverall = overallVals.length ? overallVals.reduce((a,b)=>a+b,0)/overallVals.length : null;
+  const band = maturityBand(rollupOverall);
+
+  document.getElementById("rollup-kpis").innerHTML = `
+    <div class="kpi"><p class="label">Enterprise overall</p><p class="value">${rollupOverall !== null ? rollupOverall.toFixed(1) : "—"}</p><span class="tag" style="background:var(--${band.tag}-bg); color:var(--${band.tag});">${band.label}</span></div>
+    <div class="kpi"><p class="label">Sites combined</p><p class="value">${rollupFiles.length}</p></div>
+  `;
+
+  if (chartRollup) chartRollup.destroy();
+  chartRollup = new Chart(document.getElementById("chart-rollup"), {
+    type: "radar",
+    data: { labels: CSF_ORDER, datasets: [
+      { label:"Enterprise rollup", data: rollupCSF, backgroundColor:"rgba(31,75,92,0.15)", borderColor:"#1f4b5c", pointBackgroundColor:"#1f4b5c" },
+      { label:"Target (Level 3)", data: CSF_ORDER.map(()=>3), borderColor:"#8a928f", borderDash:[4,4], pointRadius:0, fill:false }
+    ]},
+    options: { scales:{ r:{min:0,max:5,ticks:{stepSize:1}} }, plugins:{legend:{position:"bottom"}} }
+  });
+
+  document.getElementById("rollup-site-body").innerHTML = siteScores.map(s => `<tr>
+    <td>${s.file.org || "(unnamed site)"}</td>
+    <td>${STANDARDS[s.file.standardKey].label}</td>
+    <td class="num">${s.scores.overall !== null ? s.scores.overall.toFixed(1) : "—"}</td>
+  </tr>`).join("");
+
+  // Site x CSF heatmap
+  const heatmapHTML = `<thead><tr><th class="site-name">Site</th>${CSF_ORDER.map(f => `<th>${f}</th>`).join("")}</tr></thead><tbody>
+    ${siteScores.map(s => `<tr>
+      <td class="site-name">${s.file.org || "(unnamed site)"}</td>
+      ${s.scores.csfAverages.map(f => `<td><span class="site-heatmap-cell" style="background:${maturityColor(f.avg)}; display:inline-block; padding:5px 10px;">${f.avg !== null ? f.avg.toFixed(1) : "—"}</span></td>`).join("")}
+    </tr>`).join("")}
+  </tbody>`;
+  document.getElementById("rollup-heatmap-table").innerHTML = heatmapHTML;
+
+  // Sites ranked by overall maturity
+  const rankedSites = [...siteScores].sort((a,b) => (a.scores.overall ?? -1) - (b.scores.overall ?? -1));
+  if (chartSiteRanking) chartSiteRanking.destroy();
+  chartSiteRanking = new Chart(document.getElementById("chart-site-ranking"), {
+    type: "bar",
+    data: {
+      labels: rankedSites.map(s => s.file.org || "(unnamed site)"),
+      datasets: [{
+        label: "Overall maturity",
+        data: rankedSites.map(s => s.scores.overall),
+        backgroundColor: rankedSites.map(s => maturityColor(s.scores.overall))
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      scales: { x: { min:0, max:5, ticks:{stepSize:1} } },
+      plugins: { legend: { display:false } }
+    }
+  });
+
+  // Function spread (min-max range) across sites
+  const spreadData = CSF_ORDER.map((func, i) => {
+    const vals = siteScores.map(s => s.scores.csfAverages[i].avg).filter(v => v !== null);
+    return vals.length ? [Math.min(...vals), Math.max(...vals)] : [null, null];
+  });
+  if (chartFunctionSpread) chartFunctionSpread.destroy();
+  chartFunctionSpread = new Chart(document.getElementById("chart-function-spread"), {
+    type: "bar",
+    data: {
+      labels: CSF_ORDER,
+      datasets: [{ label: "Min–max range", data: spreadData, backgroundColor: "rgba(31,75,92,0.35)", borderColor:"#1f4b5c", borderWidth:1 }]
+    },
+    options: {
+      indexAxis: "y",
+      scales: { x: { min:0, max:5, ticks:{stepSize:1} } },
+      plugins: { legend:{display:false}, tooltip:{ callbacks: { label: ctx => `Range: ${ctx.raw[0]?.toFixed(1)} – ${ctx.raw[1]?.toFixed(1)}` } } }
+    }
+  });
+}
+
+/* ---------- TREND OVER TIME ---------- */
+let trendFiles = [];
+
+function addTrendFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      if (!loaded.standardKey || !STANDARDS[loaded.standardKey]) { alert("That doesn't look like a Compass assessment file."); return; }
+      trendFiles.push(loaded);
+      renderTrendFileList();
+      renderTrend();
+    } catch (err) { alert("Couldn't read that file."); }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+function removeTrendFile(idx) { trendFiles.splice(idx,1); renderTrendFileList(); renderTrend(); }
+
+function renderTrendFileList() {
+  document.getElementById("trend-file-list").innerHTML = trendFiles.map((f,i) =>
+    `<div class="multi-slot-item"><span>${f.date || "(no date)"} — ${f.org || ""} (${STANDARDS[f.standardKey].label})</span><span class="remove-x" onclick="removeTrendFile(${i})">×</span></div>`
+  ).join("");
+}
+
+let chartTrend;
+function renderTrend() {
+  const box = document.getElementById("trend-results");
+  if (trendFiles.length < 2) { box.style.display = "none"; return; }
+  box.style.display = "block";
+
+  const sorted = [...trendFiles].sort((a,b) => new Date(a.date||0) - new Date(b.date||0));
+  const scoresList = sorted.map(f => computeScores(f));
+
+  if (chartTrend) chartTrend.destroy();
+  chartTrend = new Chart(document.getElementById("chart-trend"), {
+    type: "line",
+    data: {
+      labels: sorted.map(f => f.date || "(no date)"),
+      datasets: [{
+        label: "Overall maturity",
+        data: scoresList.map(s => s.overall),
+        borderColor: "#1f4b5c",
+        backgroundColor: "rgba(31,75,92,0.15)",
+        pointBackgroundColor: "#1f4b5c",
+        tension: 0.25,
+        fill: true
+      }]
+    },
+    options: { scales: { y: { min:0, max:5, ticks:{stepSize:1} } }, plugins:{legend:{display:false}} }
+  });
+
+  let tableHTML = `<thead><tr><th>CSF Function</th>${sorted.map(f => `<th>${f.date || "—"}</th>`).join("")}</tr></thead><tbody>`;
+  CSF_ORDER.forEach((func, i) => {
+    tableHTML += `<tr><td>${func}</td>${scoresList.map(s => `<td class="num">${s.csfAverages[i].avg !== null ? s.csfAverages[i].avg.toFixed(1) : "—"}</td>`).join("")}</tr>`;
+  });
+  tableHTML += "</tbody>";
+  document.getElementById("trend-table").innerHTML = tableHTML;
+}
+</script>
+</body>
+</html>
