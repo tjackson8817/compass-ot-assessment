@@ -946,6 +946,9 @@ function computeScores(forState) {
 
 function maturityBand(avg) {
   if (avg === null) return {label:"Not scored", tag:"medium"};
+  // Scores are displayed to one decimal; band on the same rounded value so the label
+  // always agrees with the number shown (e.g. 1.98 shows as 2.0 and is "Developing").
+  avg = Math.round(avg * 10) / 10;
   if (avg < 2) return {label:"Ad hoc", tag:"critical"};
   if (avg < 3) return {label:"Developing", tag:"high"};
   if (avg < 4) return {label:"Defined", tag:"medium"};
