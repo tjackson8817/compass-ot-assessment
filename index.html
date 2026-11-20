@@ -553,7 +553,8 @@
 <script>
 const CSF_ORDER = ["GOVERN","IDENTIFY","PROTECT","DETECT","RESPOND","RECOVER"];
 
-function atk(id, name) { return { id, name, url: `https://attack.mitre.org/techniques/${id}/` }; }
+// Sub-technique IDs (e.g. T1692.001) use a slash in attack.mitre.org URLs: /techniques/T1692/001/
+function atk(id, name) { return { id, name, url: `https://attack.mitre.org/techniques/${id.replace(".", "/")}/` }; }
 
 const STANDARDS = {
   nist: {
@@ -584,8 +585,8 @@ const STANDARDS = {
         {id:"CP-2", text:"OT recovery procedures are tested periodically, including restoring from backups.", remediation:"Test full restoration from backup at least annually, including validating PLC program restoration.", attack: atk("T0879","Damage to Property")}
       ]},
       { id:"IA", name:"Identification & Authentication", csf:"PROTECT", controls:[
-        {id:"IA-1", text:"Users and processes accessing OT systems are uniquely identified; shared or default credentials are eliminated.", remediation:"Eliminate shared/default accounts on OT systems and enforce unique credentials per user.", attack: atk("T0812","Default Credentials")},
-        {id:"IA-2", text:"Device-to-device authentication is enforced for critical OT communications where technically feasible.", remediation:"Deploy certificate-based or cryptographic device authentication for critical OT communications where supported.", attack: atk("T0891","Hardcoded Credentials")}
+        {id:"IA-1", text:"Users and processes accessing OT systems are uniquely identified; shared or default credentials are eliminated.", remediation:"Eliminate shared/default accounts on OT systems and enforce unique credentials per user.", attack: atk("T1694.001","Insecure Credentials: Default Credentials")},
+        {id:"IA-2", text:"Device-to-device authentication is enforced for critical OT communications where technically feasible.", remediation:"Deploy certificate-based or cryptographic device authentication for critical OT communications where supported.", attack: atk("T1694.002","Insecure Credentials: Hardcoded Credentials")}
       ]},
       { id:"IR", name:"Incident Response", csf:"RESPOND", controls:[
         {id:"IR-1", text:"A documented OT-specific incident response plan exists and addresses the safety implications of response actions.", remediation:"Document an OT incident response plan that explicitly addresses when to prioritize safety over investigation.", attack: atk("T0831","Manipulation of Control")},
@@ -625,11 +626,11 @@ const STANDARDS = {
       ]},
       { id:"SI", name:"System & Information Integrity", csf:"DETECT", controls:[
         {id:"SI-1", text:"OT systems are monitored for indicators of malicious activity appropriate to the environment, such as allow-listing or network monitoring.", remediation:"Deploy application allow-listing or network anomaly monitoring suited to OT, where traditional AV is impractical.", attack: atk("T0851","Rootkit")},
-        {id:"SI-2", text:"A defined process exists for evaluating and applying security patches to OT systems, accounting for operational constraints.", remediation:"Establish a patch evaluation and testing process that fits within scheduled maintenance windows.", attack: atk("T0857","System Firmware")}
+        {id:"SI-2", text:"A defined process exists for evaluating and applying security patches to OT systems, accounting for operational constraints.", remediation:"Establish a patch evaluation and testing process that fits within scheduled maintenance windows.", attack: atk("T1693.001","Modify Firmware: System Firmware")}
       ]},
       { id:"SR", name:"Supply Chain Risk Management", csf:"GOVERN", controls:[
         {id:"SR-1", text:"Cybersecurity risks associated with OT hardware and software suppliers are identified and factored into vendor selection.", remediation:"Assess and document cybersecurity risk for OT hardware/software suppliers as part of vendor selection.", attack: atk("T0862","Supply Chain Compromise")},
-        {id:"SR-2", text:"Integrity of OT software and firmware updates is verified before deployment, such as through checksums or signed updates.", remediation:"Verify firmware/software update integrity via checksums or vendor-signed packages before deployment.", attack: atk("T0857","System Firmware")}
+        {id:"SR-2", text:"Integrity of OT software and firmware updates is verified before deployment, such as through checksums or signed updates.", remediation:"Verify firmware/software update integrity via checksums or vendor-signed packages before deployment.", attack: atk("T1693.001","Modify Firmware: System Firmware")}
       ]}
     ]
   },
@@ -638,8 +639,8 @@ const STANDARDS = {
     groups: [
       { id:"FR1", name:"FR1 — Identification & Authentication Control", csf:"PROTECT", controls:[
         {id:"FR1-1", text:"Human users are uniquely identified and authenticated before accessing OT systems.", remediation:"Require unique login credentials for every human user of OT systems; eliminate shared logins.", attack: atk("T0859","Valid Accounts")},
-        {id:"FR1-2", text:"Software processes and devices are identified and authenticated for machine-to-machine communication where the architecture supports it.", remediation:"Enable device/process authentication for machine-to-machine OT communication where supported.", attack: atk("T0891","Hardcoded Credentials")},
-        {id:"FR1-3", text:"Default and shared accounts are eliminated or strictly controlled, with credentials managed through a formal account lifecycle process.", remediation:"Formalize an account lifecycle process covering provisioning, review, and prompt deprovisioning.", attack: atk("T0812","Default Credentials")}
+        {id:"FR1-2", text:"Software processes and devices are identified and authenticated for machine-to-machine communication where the architecture supports it.", remediation:"Enable device/process authentication for machine-to-machine OT communication where supported.", attack: atk("T1694.002","Insecure Credentials: Hardcoded Credentials")},
+        {id:"FR1-3", text:"Default and shared accounts are eliminated or strictly controlled, with credentials managed through a formal account lifecycle process.", remediation:"Formalize an account lifecycle process covering provisioning, review, and prompt deprovisioning.", attack: atk("T1694.001","Insecure Credentials: Default Credentials")}
       ]},
       { id:"FR2", name:"FR2 — Use Control", csf:"PROTECT", controls:[
         {id:"FR2-1", text:"Authorization for OT system actions is enforced based on assigned roles and least privilege.", remediation:"Enforce least-privilege, role-based authorization for all OT system actions.", attack: atk("T0859","Valid Accounts")},
@@ -649,7 +650,7 @@ const STANDARDS = {
       { id:"FR3", name:"FR3 — System Integrity", csf:"DETECT", controls:[
         {id:"FR3-1", text:"Mechanisms are in place to detect unauthorized changes to OT control logic, configuration, or firmware.", remediation:"Deploy integrity monitoring to detect unauthorized changes to control logic, configuration, or firmware.", attack: atk("T0889","Modify Program")},
         {id:"FR3-2", text:"Malicious code protection appropriate to OT constraints is deployed, such as application allow-listing where traditional antivirus is impractical.", remediation:"Deploy application allow-listing appropriate for OT where traditional antivirus is impractical.", attack: atk("T0851","Rootkit")},
-        {id:"FR3-3", text:"Communication integrity checks protect control traffic from undetected tampering.", remediation:"Implement communication integrity checks, such as message authentication, on critical control traffic.", attack: atk("T0855","Unauthorized Command Message")}
+        {id:"FR3-3", text:"Communication integrity checks protect control traffic from undetected tampering.", remediation:"Implement communication integrity checks, such as message authentication, on critical control traffic.", attack: atk("T1692.001","Unauthorized Message: Command Message")}
       ]},
       { id:"FR4", name:"FR4 — Data Confidentiality", csf:"PROTECT", controls:[
         {id:"FR4-1", text:"Sensitive OT data at rest, such as recipes, setpoints, or historian data, is protected from unauthorized disclosure.", remediation:"Encrypt or access-restrict sensitive OT data at rest, such as recipes and historian data.", attack: atk("T0811","Data from Information Repositories")},
@@ -677,7 +678,7 @@ const STANDARDS = {
       ]},
       { id:"PGM-RISK", name:"Security Program — Risk & Patch Management (62443-2-1)", csf:"IDENTIFY", controls:[
         {id:"PGM-3", text:"Periodic risk assessments specific to the IACS/OT environment are conducted, considering safety and process impact.", remediation:"Perform periodic OT/IACS risk assessments that explicitly weigh safety and process consequences.", attack: null},
-        {id:"PGM-4", text:"A patch management process for OT systems accounts for testing and scheduled maintenance windows before deployment.", remediation:"Formalize a patch management process for OT systems that accounts for testing and maintenance windows.", attack: atk("T0857","System Firmware")}
+        {id:"PGM-4", text:"A patch management process for OT systems accounts for testing and scheduled maintenance windows before deployment.", remediation:"Formalize a patch management process for OT systems that accounts for testing and maintenance windows.", attack: atk("T1693.001","Modify Firmware: System Firmware")}
       ]}
     ]
   }
